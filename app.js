@@ -7,57 +7,56 @@ const { router, esclient } = require('./newconn');
 
 app.post('/webinar/schedule', async (req, res) => {
 
-    let { webinar_title: webinar_name, description, qa = false, registration = false, record_webinar = false, password, time_zone, start_date, hosts } = req.body;
+    let { webinar_title: webinar_name, room_id, description, qa = false, registration = false, record_webinar = false, password, time_zone, start_date, end_date, hosts } = req.body;
 
     try {
 
-        if (!typeof (qa) === Boolean) {
-            return res.status(301).json({ "QAError": "QA feild must be boolean" });
+
+        if (!webinar_name) {
+            return res.status(470).json({ "msg": "webinar title must be string and not empty" });
         }
-        if (!typeof (record_webinar) === Boolean) {
-            return res.status(301).json({ "recordWebinarError": "Record webinar must be boolean" });
-        }
-        if (!typeof (registration) === Boolean) {
-            return res.status(301).json({ "RegistrationError": "Registration feild must be boolean" });
-        }
-        if (webinar_name == "" || webinar_name == undefined) {
-            return res.status(301).json({ "webinarTitleError": "webinar title must be string and not empty" });
+        
+        if(room_id == "" && typeof(room_id)!== Number ){
+            return res.status(470).json({"msg":"room id can't be empty"});
+
         }
 
-        if (password) {
+        if(!typeof (qa && record_webinar && registration) === Boolean) {
+            return res.status(470).json({ "msg": "Field must be boolean" });
+        }
+
+        if(password) {
             const reg = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
             if (!password.match(reg)) {
-                return res.status(301).json({ "passwordError": "Password Must be one capital letter and at least 6 character" })
+                return res.status(470).json({ "msg": "Password Must be one capital letter and at least 6 character" })
             }
         }
-        if (start_date) {
+        if ((start_date !== Number && start_date.toString().length !== 13) || ((end_date !== Number && end_date.toString().length !== 13))) {
 
-            const check = !Number.isNaN(start_date) && Number.isFinite(start_date) && /^\d+\.?\d+$/.test(start_date);
-            if (!check) {
+            return res.status(470).json({ "msg": "  Date must be a 13 digit timestamp" })
 
-                return res.status(301).json({ "start_date": "start_date must be a timestamp" });
-            }
         }
         if (hosts) {
 
-            if (hosts.length == 0) {
-                return res.status(301).json({ "hostError": "Host can't be empty" })
+            if (!hosts.length) {
+                return res.status(470).json({ "msg": "Host can't be empty" })
             }
         }
-        // console.log(req.body);
+
+        let newobj = { webinar_name, description, qa, registration, record_webinar, password, time_zone, start_date, end_date, hosts }
 
         const response = await esclient.index({
 
-            index: 'webinar_registration',
-            body: req.body
+            index: 'webinar_registration_schedule',
+            body: newobj
         }).catch((e) => {
-            console.log(e)
+            return res.status(505).json({ "msg": "Something went wrong", "errorR": e });
         })
 
-        return res.status(200).json({ "sucess": "Data set into the elastic", "response": response })
+        return res.status(200).json({ "msg": "Registration successfully"});
     }
     catch (e) {
-        return res.status(501).json({ "ServerError": "Something went wrong", "error": e })
+        return res.status(501).json({ "msg": "Something went wrong", "error": e });
     }
 
 })
