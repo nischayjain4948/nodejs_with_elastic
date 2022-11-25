@@ -11,18 +11,14 @@ webinarList.post("/webinar_list", async (req, res) => {
         }
         if (!start_date || start_date.toString().length !== 13) {
             return res.status(470).json({ "message": "start_date must be a 13 digit number" })
-
         }
         if (!end_date || end_date.toString().length !== 13) {
             return res.status(470).json({ "message": "end_date must be a 13 digit number" })
-
         }
-
         const upcomingDate = start_date;
 
         if (type === "all") {
             const response = await esclient.search({
-
                 index: 'webinar_schedule_registration',
                 scroll: '20s',
                 body: {
@@ -52,40 +48,65 @@ webinarList.post("/webinar_list", async (req, res) => {
             })
             const data = response.body.hits.hits;
             console.log(data);
-            return res.status(200).json({ "record": data })
+            if (data) {
+                return res.status(200).json({ "record": data });
+            }
+            else {
+                return res.status(200).json({ "message": "No record found" });
+            }
         }
+
         else if (type === "previous") {
+
             const response = await esclient.search({
                 index: 'webinar_schedule_registration',
                 scroll: '20s',
                 body: {
-                    sort: [{start_date: {order:"desc"}}],
+                    query: {
+                        range: {
+                            start_date: {
+                                lt: Date.now()
+                            }
+                        }
+                    }
+                }
+            })
+            const data = response.body.hits.hits;
+            console.log(data);
+            if (data) {
+                return res.status(200).json({ "record": data });
+            }
+            else {
+                return res.status(200).json({ "message": "No record found" });
+            }
+        }
+        else if (type === "decrease") {
+            const response = await esclient.search({
+                index: 'webinar_schedule_registration',
+                scroll: '20s',
+                body: {
+                    sort: [{ start_date: { order: "desc" } }],
                     query: {
                         match_all: {}
                     }
                 }
-
             })
-            console.log(response.body.hits.hits);
+            const data = response.body.hits.hits;
+            console.log(data);
+            if (data) {
+                return res.status(200).json({ "record": data });
+            }
+            else {
+                return res.status(200).json({ "message": "No record found" });
+            }
         }
-
-
     } catch (e) {
         console.log(e);
     }
-
 })
-
-
 module.exports = { webinarList }
 
 
 
 
 
-// index: indexName,
-//      type: id,
-//      body: {
-//         sort: [{ "_uid": { "order": "desc" } }],
-//         size: 1,
-//         query: { match_all: {}}
