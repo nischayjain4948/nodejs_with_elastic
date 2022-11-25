@@ -3,7 +3,6 @@ const webinarList = Router();
 const { esclient } = require('../newconn');
 
 webinarList.post("/webinar_list", async (req, res) => {
-    // res.send('webinar is live now');
     try {
         let { type, start_date, end_date } = req.body
         if (!type) {
@@ -20,7 +19,8 @@ webinarList.post("/webinar_list", async (req, res) => {
         if (type === "all") {
             const response = await esclient.search({
                 index: 'webinar_schedule_registration',
-                scroll: '20s',
+                from: 2,  // This propery is used for skip the records
+                size: 20,
                 body: {
                     query: {
                         match_all: {}
@@ -35,7 +35,8 @@ webinarList.post("/webinar_list", async (req, res) => {
 
             const response = await esclient.search({
                 index: 'webinar_schedule_registration',
-                scroll: '20s',
+                from: 2,
+                size: 20,   // This property is used, how much records you want to see
                 body: {
                     query: {
                         range: {
@@ -60,10 +61,11 @@ webinarList.post("/webinar_list", async (req, res) => {
 
             const response = await esclient.search({
                 index: 'webinar_schedule_registration',
-                scroll: '20s',
+                from: 2,
+                size: 20,
                 body: {
                     query: {
-                        range: {
+                        range: {   
                             start_date: {
                                 lt: Date.now()
                             }
@@ -83,9 +85,10 @@ webinarList.post("/webinar_list", async (req, res) => {
         else if (type === "decrease") {
             const response = await esclient.search({
                 index: 'webinar_schedule_registration',
-                scroll: '20s',
+                from: 2,
+                size: 20,
                 body: {
-                    sort: [{ start_date: { order: "desc" } }],
+                    sort: [{ start_date: { order: "desc" } }],  // This propery is used for sorting the records as per our requirement....
                     query: {
                         match_all: {}
                     }
