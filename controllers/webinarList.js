@@ -1,11 +1,11 @@
-const { Router } = require('express');
-const { get } = require('mongoose');
+const { Router, response } = require('express');
+const { get, syncIndexes } = require('mongoose');
 const webinarList = Router();
 const { esclient } = require('../newconn');
 
 webinarList.post("/webinar_list", async (req, res) => {
     try {
-        let { type, start_date, end_date, webinar_title } = req.body
+        let { type, start_date, end_date, webinar_title, size, skip } = req.body
         if (!type) {
             type = "all";
         }
@@ -15,58 +15,112 @@ webinarList.post("/webinar_list", async (req, res) => {
         if (!end_date || end_date.toString().length !== 13) {
             return res.status(470).json({ "message": "end_date must be a 13 digit number" })
         }
+        if (!size  || size == "0") {
+            size = 20;
+        }
+        if (typeof (size) == 'string') {
+            size = Number(size);
+        }
+        if (!skip) {
+            skip = 0;
+        }
+        if (typeof (skip) == 'string') {
+            skip = Number(skip);
+        }
 
+        const from = skip <= 0 ? 0 : skip;
 
+        const success = (code, msg) => {
+            return res.status(code).json({message : msg})
+        }
 
+        const failed = (code, msg) =>{
+            return res.status(code).json({message : msg});
+        }
 
-
-        async function getData(){
-
-                if(webinar_title && type == "upcoming") {
-
-                    await esclient.search({
-
-                        index: 'webinar_schedule_registration',
-                        body: {
-
-                            "query": {
-                                "bool": {
-
-                                    "must": [
-                                        {
-                                            "range": {
-                                                "start_date": {
-                                                    "gte": Date.now()
-
-                                                }
-                                            }
-                                        }
-                                    ],
-
-                                    "should": [
-                                        { "match": { "webinar_title": webinar_title } }
-
-                                    ],
-                                    "minimum_should_match": 1
+        let  pipeline = {};
+        try{
+        if ((webinar_title && type == "upcoming") && (size || skip)){
+            pipeline.body = {
+                "from": from,
+                "size": size,
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "range": {
+                                    "start_date": {
+                                        "gte": Date.now()
+                                    }
                                 }
-
                             }
-
-                        }
-
-                    })
-
-                    return res.status(200).json({"message" :"result found"});
-
+                        ],
+                        "should": [
+                            { "match": { "webinar_title": webinar_title } }
+                        ],
+                        "minimum_should_match": 1
+                    }
                 }
-                else if (webinar_title && type == "previous") {
+            }
+            result = await esclient.search({ index: 'webinar_schedule_registration' }, pipeline);
+            if (result.body.hits.hits) {
+                success(200, "result found");
+            }
+            else {
+                failed(200, "empty result");
+            }
+        }
+        // else if((webinar_title && type == "previous") && (size || skip)){
+        //     pipeline.body = {
+        //         "from": from,
+        //         "size": size,
+        //         "query": {                 
+        //             "bool": {
+        //                 "must": [
+        //                     {
+        //                         "range": {
+        //                             "start_date": {
+        //                                 "lt": Date.now()
+        //                             }
+        //                         }
+        //                     }
+        //                 ],
+        //                 "should": [
+        //                     { "match": { "webinar_title": webinar_title } }
+        //                 ],
+        //                 "minimum_should_match": 1
+        //             }
+        //         }
+        //     }
+        //     result = await esclient.search({ index: 'webinar_schedule_registration' }, pipeline);
+        //     console.log("api is here now");
+        //     if (result.body.hits) {
+        //         console.log(result.body.hits.hits);
+        //         success(200, "result found");
+        //     }
+        //     else {
+        //         failed(200, "empty result");
+        //     }
+        // }
 
 
-                    await esclient.search({
+
+
+
+
+        else if ((webinar_title && type == "previous") && (size || skip)) {
+
+
+                    result = await esclient.search({
                         index: 'webinar_schedule_registration',
                         body: {
 
+
+                            "from": from,
+                            "size": size,
+
                             "query": {
+
                                 "bool": {
 
                                     "must": [
@@ -93,104 +147,49 @@ webinarList.post("/webinar_list", async (req, res) => {
 
                     })
 
-                    return res.status(200).json({"message" :"result found"});
+
+                    return res.status(200).json({ "message": "result found", "result": result.body.hits });
 
                 }
 
-                else if (type == "previous") {
-
-                    await esclient.search({
-
-                        index: 'webinar_schedule_registration',
-                        body: {
-
-                            "query": {
-
-                                "bool": {
-
-                                    "must": [
-
-                                        {
-                                            "range": {
-                                                "start_date": {
-                                                    "lte": Date.now()
-                                                }
-                                            }
-                                        }
-
-                                    ]
 
 
-                                }
-
-                            }
-
-
-                        }
-
-
-                    })
-
-                    return res.status(200).json({"message" :"result found"});
- 
-
-                }
-                else if (type == "upcoming") {
+    }
+catch(e){
+    console.log("Elastic Error", e);
+}
+       
+    
 
 
-                    await esclient.search({
-                        index: 'webinar_schedule_registration',
-                        body: {
-                            "query": {
-                                "bool": {
-
-                                    "must": [
-                                        {
-                                            "range": {
-                                                "start_date": {
-                                                    "gte": Date.now()
-
-                                                }
-                                            }
-                                        }
-                                    ]
-
-                                }
 
 
-                            }
-
-                        }
-
-                    })
-
-                    return res.status(200).json({"message" :"result found"});
-                }
-
-        }
 
 
-        console.log(getData().then((data)=>{
-            console.log(data)
-        }).catch((e)=>{
-            console.log(e);
-        }));
 
-        // const result = await getData();
-        // console.log(result);
-        
-        // async function GetData() {
 
-        //     switch (webinar_title || type) {
 
-        //         case (webinar_title && type == "upcoming"):
 
-        //             return await esclient.search({
+        // async function getData() {
+        //     let result
+
+
+        //     try {
+        //         if ((webinar_title && type == "upcoming") && (size || skip)) {
+
+        //             result = await esclient.search({
 
         //                 index: 'webinar_schedule_registration',
         //                 body: {
 
+
+        //                     "from": from,
+        //                     "size": size,
+
+
         //                     "query": {
+
+
         //                         "bool": {
 
         //                             "must": [
@@ -216,54 +215,69 @@ webinarList.post("/webinar_list", async (req, res) => {
         //                 }
 
         //             })
-        //         // return res.status(200).json({"message" :"Data found"});
+
+        //             return res.status(200).json({ "message": "result found", "result": result.body.hits });
+
+        //        }
+                // else if ((webinar_title && type == "previous") && (size || skip)) {
 
 
+                //     result = await esclient.search({
+                //         index: 'webinar_schedule_registration',
+                //         body: {
 
-        //         case (webinar_title && type == "previous"):
 
-        //             return await esclient.search({
+                //             "from": from,
+                //             "size": size,
+
+                //             "query": {
+
+                //                 "bool": {
+
+                //                     "must": [
+                //                         {
+                //                             "range": {
+                //                                 "start_date": {
+                //                                     "lt": Date.now()
+
+                //                                 }
+                //                             }
+                //                         }
+                //                     ],
+
+                //                     "should": [
+                //                         { "match": { "webinar_title": webinar_title } }
+
+                //                     ],
+                //                     "minimum_should_match": 1
+                //                 }
+
+                //             }
+
+                //         }
+
+                //     })
+
+
+                //     return res.status(200).json({ "message": "result found", "result": result.body.hits });
+
+                // }
+
+        //         else if (type == "previous" && (size || skip)) {
+
+        //             result = await esclient.search({
+
         //                 index: 'webinar_schedule_registration',
         //                 body: {
 
-        //                     "query": {
-        //                         "bool": {
+        //                     "from": from,
+        //                     "size": size,
 
-        //                             "must": [
-        //                                 {
-        //                                     "range": {
-        //                                         "start_date": {
-        //                                             "lt": Date.now()
-
-        //                                         }
-        //                                     }
-        //                                 }
-        //                             ],
-
-        //                             "should": [
-        //                                 { "match": { "webinar_title": webinar_title } }
-
-        //                             ],
-        //                             "minimum_should_match": 1
-        //                         }
-
-        //                     }
-
-        //                 }
-
-        //             })
-        //         // return res.status(200).json({"message" :"Data found"});
-
-
-
-        //         case (type == "previous"):
-
-        //             return await esclient.search({
-
-        //                 index: 'webinar_schedule_registration',
-        //                 body: {
 
         //                     "query": {
+
+
+
 
         //                         "bool": {
 
@@ -289,15 +303,22 @@ webinarList.post("/webinar_list", async (req, res) => {
 
 
         //             })
-        //         // return res.status(200).json({"message" :"Data found"});
 
 
+        //             return res.status(200).json({ "message": "result found", "result": result.body.hits });
 
 
-        //         case (type == "upcoming"):
-        //             return await esclient.search({
+        //         }
+        //         else if (type == "upcoming" && (size || skip)) {
+
+
+        //             result = await esclient.search({
         //                 index: 'webinar_schedule_registration',
         //                 body: {
+
+        //                     "from": from,
+        //                     "size": size,
+
         //                     "query": {
         //                         "bool": {
 
@@ -320,22 +341,56 @@ webinarList.post("/webinar_list", async (req, res) => {
         //                 }
 
         //             })
-        //         // return res.status(200).json({"message" :"Data found"});
+
+        //             // console.log(result);
+
+        //             return res.status(200).json({ "message": "result found", "result": result.body.hits });
+        //         }
+        //         else {
+
+        //             result = await esclient.search({
+
+        //                 index: 'webinar_schedule_registration',
+        //                 body: {
+
+        //                     "from": from,
+        //                     "size": size,
 
 
+        //                     query: {
+
+        //                         bool: {
+        //                             must: {
+        //                                 match_all: {}
+        //                             }
+        //                         }
+
+        //                     }
+
+
+        //                 }
+
+        //             })
+
+        //             return res.status(200).json({ "message": "result found", "result": result.body.hits });
+
+        //         }
 
 
         //     }
-
+        //     catch (e) {
+        //         console.log("error", e);
+        //     }
         // }
 
+        // getData();
 
-        // console.log(await GetData());
+
 
 
 
     } catch (e) {
-        console.log(e);
+        console.log("error", e);
     }
 })
 module.exports = { webinarList }
