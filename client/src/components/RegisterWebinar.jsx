@@ -56,26 +56,30 @@ export const RegisterWebinar = () => {
   }
   const startDateHandler = (e) => {
     setStartDate(e.target.value);
-    // console.log (+ new Date(e.target.value));
-    ((!start_date || + new Date(e.target.value) <= Date.now()) ? setStartDateError(true) : setStartDateError(false))
+    ((  + new Date(e.target.value) <= Date.now()) ? setStartDateError(true) : setStartDateError(false))
   }
   const endDateHandler = (e) => {
     setEndDate(e.target.value);
-    ((!end_date || + new Date(e.target.value) < new Date(start_date)) ? setEndDateError(true) : setEndDateError(false));
+    (( + new Date(e.target.value) < new Date(start_date)) ? setEndDateError(true) : setEndDateError(false));
 
   }
   const hostsHandler = (e) => {
     const tempArray = [e.target.value]
     setHosts(tempArray);
-    (hosts.length < 0 ? setHostsError(true) : setHostsError(false));
+    (hosts.length < 1 ? setHostsError(true) : setHostsError(false));
   }
-
-
 
 
   const getData = () => {
 
-    ((!qa && !registration && !webinar_recording) ? setOptionError(true) : setOptionError(false));
+    if(!webinar_title || !description || !password || !start_date || !end_date || !hosts.length > 1 ){
+
+      return; 
+      
+    }
+
+   
+
     console.log(webinar_title);
     console.log(description);
     console.log(password);
@@ -116,13 +120,13 @@ export const RegisterWebinar = () => {
           </div>
 
           <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-            <input type="checkbox" class="btn-check" id="btncheck1" value="qa" checked={qa} onChange={() => setQA(!qa)} autocomplete="off" />
+            <input type="checkbox" class="btn-check" id="btncheck1" value="qa" checked={qa} onChange={() => setQA(!qa)} autocomplete="off"/>
             <label class="btn btn-outline-primary" for="btncheck1">QA</label>
 
-            <input type="checkbox" class="btn-check" id="btncheck2" value="registration" checked={registration} onChange={() => setRegistration(!registration)} autocomplete="off" />
+            <input type="checkbox" class="btn-check" id="btncheck2" value="registration" checked={registration} onChange={() => setRegistration(!registration)} autocomplete="off"/>
             <label class="btn btn-outline-primary" for="btncheck2">Registration</label>
 
-            <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off" value="webinar_recording" checked={webinar_recording} onChange={() => setWebinarRecoring(!webinar_recording)} />
+            <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off" value="webinar_recording" checked={webinar_recording} onChange={() => setWebinarRecoring(!webinar_recording)}/>
             <label class="btn btn-outline-primary" for="btncheck3">Webinar_Recording</label>
             <br />
             <br />
@@ -142,7 +146,7 @@ export const RegisterWebinar = () => {
           <div class="form-group row">
             <label for="inputPassword3" class="col-sm-2 col-form-label">Start Date :</label>
             <div class="col-sm-10">
-              <input type="datetime-local" class="form-control" id="inputPassword3" onChange={startDateHandler} value={start_date} />
+              <input type="datetime-local" class="form-control" id="inputPassword3" onChange={startDateHandler} value={start_date} required />
               <br />
               {start_date_error ? <p class="text-danger">Date and time Must be grethar than current Date and time </p> : ""}
             </div>
@@ -152,7 +156,7 @@ export const RegisterWebinar = () => {
           <div class="form-group row">
             <label for="inputPassword3" class="col-sm-2 col-form-label">End Date : </label>
             <div class="col-sm-10">
-              <input type="datetime-local" class="form-control" id="inputPassword3" onChange={endDateHandler} value={end_date} />
+              <input type="datetime-local" class="form-control" id="inputPassword3" onChange={endDateHandler} value={end_date} required />
               <br />
               {end_date_error ? <p class="text-danger"> End Date  Must be grethar than Start Date  </p> : ""}
             </div>
@@ -174,8 +178,11 @@ export const RegisterWebinar = () => {
           <br />
 
           <br />
+          {!webinar_title_error && !password_error && !start_date_error && !end_date_error ?
           <button className="btn btn-primary" onClick={getData}>Register Now</button>
-
+ :
+ ""             
+}
 
 
         </form>

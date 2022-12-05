@@ -5,7 +5,7 @@ const { esclient } = require('../newconn');
 
 webinarList.post("/webinar_list", async (req, res) => {
     try {
-        let { type, start_date, end_date, webinar_title, size, skip } = req.body
+        let { type, start_date, end_date, webinar_title, size, skip} = req.body
         if (!type) {
             type = "all";
         }
@@ -189,5 +189,4 @@ webinarList.post("/webinar_list", async (req, res) => {
     }
 })
 module.exports = { webinarList }
-
 
