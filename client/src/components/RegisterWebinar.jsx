@@ -78,8 +78,6 @@ export const RegisterWebinar = () => {
       
     }
 
-   
-
     console.log(webinar_title);
     console.log(description);
     console.log(password);
@@ -89,8 +87,6 @@ export const RegisterWebinar = () => {
     console.log(qa);
     console.log(registration);
     console.log(webinar_recording);
-
-
 
   }
   return (

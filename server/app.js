@@ -8,6 +8,9 @@ const { router, esclient } = require('./newconn');
 const { webinarList } = require('./controllers/webinarList');
 const {feedback} = require('./controllers/feedBack')
 const { response } = require('express');
+const {getWebinar} = require('./controllers/getWebinar')
+const cors = require('cors');
+app.use(cors());
 
 app.post('/schedule_webinar', async (req, res, next) => {
     let userId = await mongoose.Types.ObjectId();
@@ -107,6 +110,8 @@ app.post('/schedule_webinar', async (req, res, next) => {
 
 app.use(webinarList);
 app.use(feedback);
+app.use(getWebinar);
+
 
 // app.get('/health', router)
 
