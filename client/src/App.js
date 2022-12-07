@@ -7,6 +7,7 @@ import ParentComponent from './test/ParentComponent';
 import List from './test/List';
 import Styling from './test/Styling';
 import Inline from './test/Inline';
+import Form from './test/Form';
 function App() {
   return (
     <>
@@ -14,13 +15,14 @@ function App() {
       {/* <h1>Webinar</h1> */}
       
       {/* <Navbar/> */}
-      {/* <RegisterWebinar/> */}
+      <RegisterWebinar/>
       {/* <Timer/> */}
 
      {/* <ParentComponent/> */}
      {/* <List/> */}
      {/* <Styling primary={true}/> */}
-     <Inline/>
+     {/* <Inline/> */}
+     {/* <Form/> */}
       </>
 
   );

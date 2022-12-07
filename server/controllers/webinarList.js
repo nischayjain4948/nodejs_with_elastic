@@ -15,9 +15,13 @@ webinarList.post("/v1/webinar/list", async (req, res) => {
         if (!type) {
             type = "all";
         }
-        if (!size || size == "0") {
+        if(size===0){
+            return res.status(200).json({"result":[]})
+        }
+        if (!size) {
             size = 20;
         }
+       
         if (typeof (size) == 'string') {
             size = Number(size);
         }
@@ -43,7 +47,7 @@ webinarList.post("/v1/webinar/list", async (req, res) => {
                                     "must": [
                                         {
                                             "range": {
-                                                "start_date": {
+                                                "startDate": {
                                                     "gte": Date.now()
                                                 }
                                             }
@@ -71,7 +75,7 @@ webinarList.post("/v1/webinar/list", async (req, res) => {
                                     "must": [
                                         {
                                             "range": {
-                                                "start_date": {
+                                                "startDate": {
                                                     "lt": Date.now()
                                                 }
                                             }

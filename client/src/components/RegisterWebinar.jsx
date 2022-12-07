@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useState } from 'react'
+import Axios from 'axios';
 
 
 
@@ -70,23 +71,24 @@ export const RegisterWebinar = () => {
   }
 
 
-  const getData = () => {
+  const getData = async () => {
 
     if(!webinar_title || !description || !password || !start_date || !end_date || !hosts.length > 1 ){
-
       return; 
-      
     }
 
-    console.log(webinar_title);
-    console.log(description);
-    console.log(password);
-    console.log(start_date);
-    console.log(end_date);
-    console.log(hosts);
-    console.log(qa);
-    console.log(registration);
-    console.log(webinar_recording);
+    var newStartDate = start_date;
+    newStartDate = new Date(newStartDate).getTime();
+    var newEndDate = end_date; newEndDate = new Date(newEndDate).getTime();
+    const hosTrim =  hosts[0].trim();
+    const splitArr = hosTrim.split("\n");
+    const hostArray = splitArr.filter(x=>x);
+
+    const body = {title:webinar_title, description:description, qa:qa, registration:registration, record:webinar_recording, password:password, startDate:newStartDate, endDate:newEndDate, hostIds:hostArray};
+    console.log(body);
+  
+  //  const result =  await Axios.post("http://localhost:4200/v1/webinar/schedule_webinar", body)
+
 
   }
   return (
@@ -95,79 +97,79 @@ export const RegisterWebinar = () => {
         <form onSubmit={formHandler}>
 
 
-          <div class="form-group row">
-            <label for="inputEmail3" class="col-sm-2 col-form-label">Webinar Title:</label>
-            <div class="col-sm-10">
-              <input type="text" class="form-control" onChange={webinarTitleHandler} value={webinar_title} required />
+          <div className="form-group row">
+            <label  className="col-sm-2 col-form-label">Webinar Title:</label>
+            <div className="col-sm-10">
+              <input type="text" className="form-control" onChange={webinarTitleHandler} value={webinar_title} required />
               <br />
-              {webinar_title_error ? <p class="text-danger">Please fill the webinar title Minimum length 15 </p> : ""}
-              <br />
-            </div>
-          </div>
-
-
-
-          <div class="form-group row">
-            <label for="inputEmail3" class="col-sm-2 col-form-label">Description:</label>
-            <div class="col-sm-10">
-              <textarea className="form-control" name="" id="" cols="30" rows="5" onChange={descriptionHandler} value={description} required ></textarea>
+              {webinar_title_error ? <p className="text-danger">Please fill the webinar title Minimum length 15 </p> : ""}
               <br />
             </div>
           </div>
 
-          <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-            <input type="checkbox" class="btn-check" id="btncheck1" value="qa" checked={qa} onChange={() => setQA(!qa)} autocomplete="off"/>
-            <label class="btn btn-outline-primary" for="btncheck1">QA</label>
 
-            <input type="checkbox" class="btn-check" id="btncheck2" value="registration" checked={registration} onChange={() => setRegistration(!registration)} autocomplete="off"/>
-            <label class="btn btn-outline-primary" for="btncheck2">Registration</label>
 
-            <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off" value="webinar_recording" checked={webinar_recording} onChange={() => setWebinarRecoring(!webinar_recording)}/>
-            <label class="btn btn-outline-primary" for="btncheck3">Webinar_Recording</label>
+          <div className="form-group row">
+            <label  className="col-sm-2 col-form-label">Description:</label>
+            <div className="col-sm-10">
+              <textarea className="form-control" name="" id="textarea1" cols="30" rows="5" onChange={descriptionHandler} value={description} required ></textarea>
+              <br />
+            </div>
+          </div>
+
+          <div className="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+            <input type="checkbox" className="btn-check" id="btncheck1" value="qa" checked={qa} onChange={() => setQA(!qa)} autoComplete="off"/>
+            <label className="btn btn-outline-primary" >QA</label>
+
+            <input type="checkbox" className="btn-check" id="btncheck2" value="registration" checked={registration} onChange={() => setRegistration(!registration)} autoComplete="off"/>
+            <label className="btn btn-outline-primary" >Registration</label>
+
+            <input type="checkbox" className="btn-check" id="btncheck3" autoComplete="off" value="webinar_recording" checked={webinar_recording} onChange={() => setWebinarRecoring(!webinar_recording)}/>
+            <label className="btn btn-outline-primary" >Webinar_Recording</label>
             <br />
             <br />
           </div>
-          {option_error ? <p class="text-danger">Please choose atleast one option</p> : ""}
+          {option_error ? <p className="text-danger">Please choose atleast one option</p> : ""}
 
 
-          <div class="form-group row"  >
-            <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
-            <div class="col-sm-10">
-              <input type="password" class="form-control" id="inputPassword3" onChange={passwordHandler} value={password} required />
+          <div className="form-group row"  >
+            <label  className="col-sm-2 col-form-label">Password</label>
+            <div className="col-sm-10">
+              <input type="password" className="form-control"  onChange={passwordHandler} value={password} required />
               <br />
-              {password_error ? <p class="text-danger">Please fill the password field One letter capital min 6 length</p> : ""}
+              {password_error ? <p className="text-danger">Please fill the password field One letter capital min 6 length</p> : ""}
             </div>
           </div>
 
-          <div class="form-group row">
-            <label for="inputPassword3" class="col-sm-2 col-form-label">Start Date :</label>
-            <div class="col-sm-10">
-              <input type="datetime-local" class="form-control" id="inputPassword3" onChange={startDateHandler} value={start_date} required />
+          <div className="form-group row">
+            <label  className="col-sm-2 col-form-label">Start Date :</label>
+            <div className="col-sm-10">
+              <input type="datetime-local" className="form-control"  onChange={startDateHandler} value={start_date} required />
               <br />
-              {start_date_error ? <p class="text-danger">Date and time Must be grethar than current Date and time </p> : ""}
-            </div>
-          </div>
-
-
-          <div class="form-group row">
-            <label for="inputPassword3" class="col-sm-2 col-form-label">End Date : </label>
-            <div class="col-sm-10">
-              <input type="datetime-local" class="form-control" id="inputPassword3" onChange={endDateHandler} value={end_date} required />
-              <br />
-              {end_date_error ? <p class="text-danger"> End Date  Must be grethar than Start Date  </p> : ""}
+              {start_date_error ? <p className="text-danger">Date and time Must be grethar than current Date and time </p> : ""}
             </div>
           </div>
 
 
+          <div className="form-group row">
+            <label  className="col-sm-2 col-form-label">End Date : </label>
+            <div className="col-sm-10">
+              <input type="datetime-local" className="form-control"  onChange={endDateHandler} value={end_date} required />
+              <br />
+              {end_date_error ? <p className="text-danger"> End Date  Must be grethar than Start Date  </p> : ""}
+            </div>
+          </div>
 
-          <div class="form-group row">
-            <label for="inputEmail3" class="col-sm-2 col-form-label">Hosts:</label>
-            <div class="col-sm-10">
-              <textarea className="form-control" name="" id="" cols="30" rows="5" onChange={hostsHandler} value={hosts} required></textarea>
+
+
+          <div className="form-group row">
+            <label  className="col-sm-2 col-form-label">Hosts:</label>
+            <div className="col-sm-10">
+              <textarea className="form-control" name="" id="textarea2" cols="30" rows="5" onChange={hostsHandler} value={hosts} required></textarea>
               <br />
 
 
-              {hosts_error ? <p class="text-danger"> Hosts Can't be Empty..!! </p> : ""}
+              {hosts_error ? <p className="text-danger"> Hosts Can't be Empty..!! </p> : ""}
 
             </div>
           </div>
