@@ -1,35 +1,36 @@
 
 const express = require('express');
-const validator = require('validator');
 const app = express();
 app.use(express.json());
 const mongoose = require('mongoose');
 const { router, esclient } = require('./newconn');
 const { webinarList } = require('./controllers/webinarList');
 const {feedback} = require('./controllers/feedBack')
-const { response } = require('express');
 const {getWebinar} = require('./controllers/getWebinar')
-const cors = require('cors');
-app.use(cors());
+const {cancelWebinar} = require('./controllers/cancelWebinar')
+const {report} = require("./controllers/report");
+const cors = require("cors");
+app.use(cors())
+app.use(express.urlencoded({extended:true}));
 
 app.post('/v1/webinar/schedule_webinar', async (req, res, next) => {
     let userId = await mongoose.Types.ObjectId();
     req.userInfo = {
         userId,
         email:"hobbit@gmail.com",
-        userName: 'nischay_jain_fullstack',
+        userName: 'gWyO8YQBwRaFiOgndMcW',
         elastic_id: 'ZWxK4YQBwRaFiOgnUsfH'
     }
     const {elastic_id, userName, email} = req.userInfo;
-    const usernameRegex = /^[a-zA-Z0-9]+$/;
-    if (!userName && !usernameRegex.test(userName)) {
-        return res.status(470).json({ "message": "userName not found or invalid userName" });
-    }
-    const mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if(!email || !email.match(mailformat)){
-        return res.status(470).json({"message":"Not a vali Email format"});
+    // const usernameRegex = /^[a-zA-Z0-9]+$/;
+    // if (!userName && !usernameRegex.test(userName)) {
+    //     return res.status(470).json({ "message": "userName not found or invalid userName" });
+    // }
+    // const mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    // if(!email || !email.match(mailformat)){
+    //     return res.status(470).json({"message":"Not a vali Email format"});
 
-    }
+    // }
     req.headers = {elastic_id , userName, email};
     next()
 },
@@ -124,6 +125,8 @@ app.post('/v1/webinar/schedule_webinar', async (req, res, next) => {
 app.use(webinarList);
 app.use(feedback);
 app.use(getWebinar);
+app.use(cancelWebinar);
+app.use(report);
 // app.get('/health', router)
 
 app.get("/", (req, res) => {

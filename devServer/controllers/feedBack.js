@@ -1,25 +1,29 @@
 const feedback = require('express').Router();
 const { esclient } = require('../newconn');
 
-feedback.post('/feedback', async (req, res) => {
-    // res.send('feed back api is running');
-    const { feedbackType, message, report_date, email, elastic_id } = req.body;
+feedback.post('/v1/webinar/feedback', async (req,res,next)=>{
+
+    req.userInfo = {
+        email:"hobbit@gmail.com",
+        elastic_id:"e2xR8IQBwRaFiOgnpMdR"
+    }
+    const {email, elastic_id} = req.userInfo;
+    req.headers = {email, elastic_id};
+    next();
+},   async  (req, res) => {
+
+    const email = req.headers.email;
+    const elastic_id = req.headers.elastic_id;
+
+    var { feedbackType, message} = req.body;
     if (!feedbackType) {
         res.status(470).json({ "message": "feedBack type must be selected" });
     }
     if (!message) {
         res.status(470).json({ "message": "Please leave a message" });
     }
-    if (!report_date) {
-        res.status(470).json({ "message": "Please mention the report date" });
-    }
-    if (!email) {
-        res.status(470).json({ "message": "Email required" });
-    }
-    if (!elastic_id) {
-        res.status(470).json({ "message": "Elastic_Id required" });
-    }
-    const body = { feedbackType, message, report_date, email, elastic_id }
+    var reportDate = new Date().toISOString(); 
+    const body = { feedbackType, message, reportDate, email, elastic_id }
     try {
         const response = await esclient.get({
             index: 'webinar_schedule_registration',
@@ -29,7 +33,7 @@ feedback.post('/feedback', async (req, res) => {
             index: 'webinar_reports',
             body
         })
-        return res.status(200).json({ "message": "Report added successfully" });
+        return res.status(200).json({ "message": "feedback added successfully" });
     }
     catch (err) {
         // console.log(err)

@@ -80,14 +80,18 @@ export const RegisterWebinar = () => {
     var newStartDate = start_date;
     newStartDate = new Date(newStartDate).getTime();
     var newEndDate = end_date; newEndDate = new Date(newEndDate).getTime();
+   
     const hosTrim =  hosts[0].trim();
     const splitArr = hosTrim.split("\n");
     const hostArray = splitArr.filter(x=>x);
 
+
+   
+
     const body = {title:webinar_title, description:description, qa:qa, registration:registration, record:webinar_recording, password:password, startDate:newStartDate, endDate:newEndDate, hostIds:hostArray};
-    console.log(body);
+    // console.log(body);
   
-  //  const result =  await Axios.post("http://localhost:4200/v1/webinar/schedule_webinar", body)
+   const result =  await Axios.post("http://localhost:4200/v1/webinar/schedule_webinar", body)
 
 
   }
