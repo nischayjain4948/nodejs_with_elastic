@@ -17,8 +17,8 @@ app.post('/v1/webinar/schedule_webinar', async (req, res, next) => {
     let userId = await mongoose.Types.ObjectId();
     req.userInfo = {
         userId,
-        email:"hobbit@gmail.com",
-        userName: 'gWyO8YQBwRaFiOgndMcW',
+        email:"nischayjain@gmail.com",
+        userName: 'hGy89YQBwRaFiOgnssck',
         elastic_id: 'ZWxK4YQBwRaFiOgnUsfH'
     }
     const {elastic_id, userName, email} = req.userInfo;

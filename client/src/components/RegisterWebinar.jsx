@@ -84,14 +84,22 @@ export const RegisterWebinar = () => {
     const hosTrim =  hosts[0].trim();
     const splitArr = hosTrim.split("\n");
     const hostArray = splitArr.filter(x=>x);
-
-
-   
-
+    newEndDate  = ((newEndDate - newStartDate)/1000)/60;
+    newEndDate = {h:0,m:newEndDate};
     const body = {title:webinar_title, description:description, qa:qa, registration:registration, record:webinar_recording, password:password, startDate:newStartDate, endDate:newEndDate, hostIds:hostArray};
-    // console.log(body);
+    console.log(body);
   
-   const result =  await Axios.post("http://localhost:4200/v1/webinar/schedule_webinar", body)
+   const result =  await Axios.post("http://localhost:4200/v1/webinar/schedule_webinar", body).catch((err)=>{
+    console.log(err);
+   })
+
+   if(result.status === 200){
+    console.log("webinar is registered successfully!");
+   }
+   else{
+    console.log("something went wrong");
+   }
+   
 
 
   }
